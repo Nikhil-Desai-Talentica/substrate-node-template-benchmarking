@@ -23,7 +23,7 @@
 use crate::service::FullClient;
 
 use node_template_runtime as runtime;
-use runtime::{AccountId, Balance, BalancesCall, SystemCall};
+use runtime::{AccountId, Balance, BalancesCall, SystemCall, NicksCall, TemplateCall};
 use sc_cli::Result;
 use sc_client_api::BlockBackend;
 use sp_core::{Encode, Pair};
@@ -104,6 +104,119 @@ impl frame_benchmarking_cli::ExtrinsicBuilder for TransferKeepAliveBuilder {
 				dest: self.dest.clone().into(),
 				value: self.value.into(),
 			}
+			.into(),
+			nonce,
+		)
+		.into();
+
+		Ok(extrinsic)
+	}
+}
+
+/// Generates `Nicks::SetName` extrinsics for the benchmarks.
+///
+/// Note: Should only be used for benchmarking.
+pub struct SetNameBuilder {
+	client: Arc<FullClient>,
+	name: Vec<u8>,
+}
+
+impl SetNameBuilder {
+	/// Creates a new [`Self`] from the given client.
+	pub fn new(client: Arc<FullClient>, name: Vec<u8>) -> Self {
+		Self { client, name }
+	}
+}
+
+impl frame_benchmarking_cli::ExtrinsicBuilder for SetNameBuilder {
+
+	fn pallet(&self) -> &str {
+		"nicks"
+	}
+
+	fn extrinsic(&self) -> &str {
+		"set_name"
+	}
+
+	fn build(&self, nonce: u32) -> std::result::Result<OpaqueExtrinsic, &'static str> {
+		let acc = Sr25519Keyring::Bob.pair();
+		let extrinsic: OpaqueExtrinsic = create_benchmark_extrinsic(
+			self.client.as_ref(),
+			acc,
+			NicksCall::set_name {
+				name: self.name.clone().into(),
+			}
+			.into(),
+			nonce,
+		)
+		.into();
+
+		Ok(extrinsic)
+	}
+}
+
+pub struct UpdateSomeNumBuilder {
+	client: Arc<FullClient>,
+	value: u64,
+}
+
+impl UpdateSomeNumBuilder {
+	pub fn new(client: Arc<FullClient>, value: u64) -> Self {
+		Self { client, value }
+	}
+}
+
+impl frame_benchmarking_cli::ExtrinsicBuilder for UpdateSomeNumBuilder {
+	fn pallet(&self) -> &str {
+		"template"
+	}
+
+	fn extrinsic(&self) -> &str {
+		"update_some_num"
+	}
+
+	fn build(&self, nonce: u32) -> std::result::Result<OpaqueExtrinsic, &'static str> {
+		let acc = Sr25519Keyring::Bob.pair();
+		let extrinsic: OpaqueExtrinsic = create_benchmark_extrinsic(
+			self.client.as_ref(),
+			acc,
+			TemplateCall::update_some_num {
+				value: self.value.clone().into(),
+			}
+			.into(),
+			nonce,
+		)
+		.into();
+
+		Ok(extrinsic)
+	}
+}
+
+pub struct GetSomeNumBuilder {
+	client: Arc<FullClient>,
+}
+
+impl GetSomeNumBuilder {
+	pub fn new(client: Arc<FullClient>) -> Self {
+		Self { client }
+	}
+}
+
+impl frame_benchmarking_cli::ExtrinsicBuilder for GetSomeNumBuilder {
+	fn pallet(&self) -> &str {
+		"template"
+	}
+
+	fn extrinsic(&self) -> &str {
+		"get_some_num"
+	}
+
+	fn build(&self, nonce: u32) -> std::result::Result<OpaqueExtrinsic, &'static str> {
+		let acc = Sr25519Keyring::Bob.pair();
+		let extrinsic: OpaqueExtrinsic = create_benchmark_extrinsic(
+			self.client.as_ref(),
+			acc,
+			TemplateCall::get_some_num {}
 			.into(),
 			nonce,
 		)

@@ -1,5 +1,5 @@
 use crate::{
-	benchmarking::{inherent_benchmark_data, RemarkBuilder, TransferKeepAliveBuilder},
+	benchmarking::{inherent_benchmark_data, RemarkBuilder, TransferKeepAliveBuilder, SetNameBuilder, UpdateSomeNumBuilder, GetSomeNumBuilder},
 	chain_spec,
 	cli::{Cli, Subcommand},
 	service,
@@ -162,6 +162,17 @@ pub fn run() -> sc_cli::Result<()> {
 								client.clone(),
 								Sr25519Keyring::Alice.to_account_id(),
 								EXISTENTIAL_DEPOSIT,
+							)),
+							Box::new(SetNameBuilder::new(
+								client.clone(),
+								String::from("abcdefghijklmnopqrstuvwxyz123456").into_bytes()
+							)),
+							Box::new(UpdateSomeNumBuilder::new(
+								client.clone(),
+								u64::MAX,
+							)),
+							Box::new(GetSomeNumBuilder::new(
+								client.clone(),
 							)),
 						]);
 
