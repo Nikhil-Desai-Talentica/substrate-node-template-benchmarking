@@ -5,15 +5,33 @@
 use crate::service::FullClient;
 
 use node_template_runtime as runtime;
-use runtime::{AccountId, Balance, BalancesCall, SystemCall, NicksCall, TemplateCall};
+use runtime::{AccountId, Balance, BalancesCall, SystemCall, NicksCall, TemplateCall, ContractsCall, Address};
 use sc_cli::Result;
 use sc_client_api::BlockBackend;
 use sp_core::{Encode, Pair};
 use sp_inherents::{InherentData, InherentDataProvider};
 use sp_keyring::Sr25519Keyring;
-use sp_runtime::{OpaqueExtrinsic, SaturatedConversion};
+use sp_runtime::{OpaqueExtrinsic, SaturatedConversion, AccountId32};
 
-use std::{sync::Arc, time::Duration};
+use std::{sync::Arc, time::Duration, str::FromStr};
+
+use rand::{thread_rng, Rng};
+use rand::distributions::Alphanumeric;
+
+fn generate_random_integer() -> i64 {
+	let mut trng = thread_rng();
+	trng.gen()
+}
+
+fn generate_random_string() -> String {
+	let trng = thread_rng();
+	let length: usize = 100;
+	// let length: usize = trng.gen_range(0..100);
+	trng.sample_iter(Alphanumeric)
+                .take(length)
+                .map(char::from)
+                .collect()
+}
 
 /// Generates extrinsics for the `benchmark overhead` command.
 ///
@@ -139,12 +157,11 @@ impl frame_benchmarking_cli::ExtrinsicBuilder for SetNameBuilder {
 
 pub struct UpdateSomeNumBuilder {
 	client: Arc<FullClient>,
-	value: u64,
 }
 
 impl UpdateSomeNumBuilder {
-	pub fn new(client: Arc<FullClient>, value: u64) -> Self {
-		Self { client, value }
+	pub fn new(client: Arc<FullClient>) -> Self {
+		Self { client }
 	}
 }
 
@@ -163,7 +180,7 @@ impl frame_benchmarking_cli::ExtrinsicBuilder for UpdateSomeNumBuilder {
 			self.client.as_ref(),
 			acc,
 			TemplateCall::update_some_num {
-				value: self.value.clone().into(),
+				value: generate_random_integer().clone().into(),
 			}
 			.into(),
 			nonce,
@@ -200,6 +217,252 @@ impl frame_benchmarking_cli::ExtrinsicBuilder for GetSomeNumBuilder {
 			acc,
 			TemplateCall::get_some_num {}
 			.into(),
+			nonce,
+		)
+		.into();
+
+		Ok(extrinsic)
+	}
+}
+
+pub struct UpdateSomeStrBuilder {
+	client: Arc<FullClient>,
+}
+
+impl UpdateSomeStrBuilder {
+	pub fn new(client: Arc<FullClient>) -> Self {
+		Self { client }
+	}
+}
+
+impl frame_benchmarking_cli::ExtrinsicBuilder for UpdateSomeStrBuilder {
+
+	fn pallet(&self) -> &str {
+		"template"
+	}
+
+	fn extrinsic(&self) -> &str {
+		"update_some_str"
+	}
+
+	fn build(&self, nonce: u32) -> std::result::Result<OpaqueExtrinsic, &'static str> {
+		let acc = Sr25519Keyring::Bob.pair();
+		let extrinsic: OpaqueExtrinsic = create_benchmark_extrinsic(
+			self.client.as_ref(),
+			acc,
+			TemplateCall::update_some_str {
+				new_str: generate_random_string().into_bytes()
+			}
+			.into(),
+			nonce,
+		)
+		.into();
+
+		Ok(extrinsic)
+	}
+}
+
+pub struct GetSomeStrBuilder {
+	client: Arc<FullClient>,
+}
+
+impl GetSomeStrBuilder {
+	pub fn new(client: Arc<FullClient>) -> Self {
+		Self { client }
+	}
+}
+
+impl frame_benchmarking_cli::ExtrinsicBuilder for GetSomeStrBuilder {
+	fn pallet(&self) -> &str {
+		"template"
+	}
+
+	fn extrinsic(&self) -> &str {
+		"get_some_str"
+	}
+
+	fn build(&self, nonce: u32) -> std::result::Result<OpaqueExtrinsic, &'static str> {
+		let acc = Sr25519Keyring::Bob.pair();
+		let extrinsic: OpaqueExtrinsic = create_benchmark_extrinsic(
+			self.client.as_ref(),
+			acc,
+			TemplateCall::get_some_str {}
+			.into(),
+			nonce,
+		)
+		.into();
+
+		Ok(extrinsic)
+	}
+}
+
+pub struct InkUpdateNumBuilder {
+	client: Arc<FullClient>,
+	contract_addr: String,
+}
+
+impl InkUpdateNumBuilder {
+	pub fn new(client: Arc<FullClient>, contract_addr: String) -> Self {
+		Self { client, contract_addr }
+	}
+}
+
+impl frame_benchmarking_cli::ExtrinsicBuilder for InkUpdateNumBuilder {
+	fn pallet(&self) -> &str {
+		"contract-test"
+	}
+
+	fn extrinsic(&self) -> &str {
+		"update_num"
+	}
+
+	fn build(&self, nonce: u32) -> std::result::Result<OpaqueExtrinsic, &'static str> {
+		let mut call_data: Vec<u8> = Vec::new();
+		let mut msg_selector: Vec<u8> = [0xFB, 0xAF, 0x91, 0xE1].into();
+		let mut msg_args = generate_random_integer().encode();
+		call_data.append(&mut msg_selector);
+		call_data.append(&mut msg_args);
+		let acc = Sr25519Keyring::Bob.pair();
+		let extrinsic: OpaqueExtrinsic = create_benchmark_extrinsic(
+			self.client.as_ref(),
+			acc,
+			ContractsCall::call {
+				 dest: Address::Address32(*AccountId32::from_str(&*self.contract_addr).unwrap().as_ref()).into(),
+				 value: Default::default(),
+				 gas_limit: Default::default(),
+				 storage_deposit_limit: Default::default(),
+				 data: call_data.clone()
+			}.into(),
+			nonce,
+		)
+		.into();
+
+		Ok(extrinsic)
+	}
+}
+
+pub struct InkGetNumBuilder {
+	client: Arc<FullClient>,
+	contract_addr: String,
+}
+
+impl InkGetNumBuilder {
+	pub fn new(client: Arc<FullClient>, contract_addr: String) -> Self {
+		Self { client, contract_addr }
+	}
+}
+
+impl frame_benchmarking_cli::ExtrinsicBuilder for InkGetNumBuilder {
+	fn pallet(&self) -> &str {
+		"contract-test"
+	}
+
+	fn extrinsic(&self) -> &str {
+		"get_num"
+	}
+
+	fn build(&self, nonce: u32) -> std::result::Result<OpaqueExtrinsic, &'static str> {
+		let mut call_data: Vec<u8> = Vec::new();
+		let mut msg_selector: Vec<u8> = [0xCF, 0xE3, 0x9F, 0xC5].into();
+		call_data.append(&mut msg_selector);
+		let acc = Sr25519Keyring::Bob.pair();
+		let extrinsic: OpaqueExtrinsic = create_benchmark_extrinsic(
+			self.client.as_ref(),
+			acc,
+			ContractsCall::call {
+				 dest: Address::Address32(*AccountId32::from_str(&*self.contract_addr).unwrap().as_ref()).into(),
+				 value: Default::default(),
+				 gas_limit: Default::default(),
+				 storage_deposit_limit: Default::default(),
+				 data: call_data.clone()
+			}.into(),
+			nonce,
+		)
+		.into();
+
+		Ok(extrinsic)
+	}
+}
+pub struct InkUpdateSBuilder {
+	client: Arc<FullClient>,
+	contract_addr: String,
+}
+
+impl InkUpdateSBuilder {
+	pub fn new(client: Arc<FullClient>, contract_addr: String) -> Self {
+		Self { client, contract_addr }
+	}
+}
+
+impl frame_benchmarking_cli::ExtrinsicBuilder for InkUpdateSBuilder {
+	fn pallet(&self) -> &str {
+		"contract-test"
+	}
+
+	fn extrinsic(&self) -> &str {
+		"update_s"
+	}
+
+	fn build(&self, nonce: u32) -> std::result::Result<OpaqueExtrinsic, &'static str> {
+		let mut call_data: Vec<u8> = Vec::new();
+		let mut msg_selector: Vec<u8> = [0x90, 0xC9, 0xB3, 0xF8].into();
+		let mut msg_args = generate_random_string().encode();
+		call_data.append(&mut msg_selector);
+		call_data.append(&mut msg_args);
+		let acc = Sr25519Keyring::Bob.pair();
+		let extrinsic: OpaqueExtrinsic = create_benchmark_extrinsic(
+			self.client.as_ref(),
+			acc,
+			ContractsCall::call {
+				 dest: Address::Address32(*AccountId32::from_str(&*self.contract_addr).unwrap().as_ref()).into(),
+				 value: Default::default(),
+				 gas_limit: Default::default(),
+				 storage_deposit_limit: Default::default(),
+				 data: call_data.clone()
+			}.into(),
+			nonce,
+		)
+		.into();
+
+		Ok(extrinsic)
+	}
+}
+
+pub struct InkGetSBuilder {
+	client: Arc<FullClient>,
+	contract_addr: String,
+}
+
+impl InkGetSBuilder {
+	pub fn new(client: Arc<FullClient>, contract_addr: String) -> Self {
+		Self { client, contract_addr }
+	}
+}
+
+impl frame_benchmarking_cli::ExtrinsicBuilder for InkGetSBuilder {
+	fn pallet(&self) -> &str {
+		"contract-test"
+	}
+
+	fn extrinsic(&self) -> &str {
+		"get_s"
+	}
+
+	fn build(&self, nonce: u32) -> std::result::Result<OpaqueExtrinsic, &'static str> {
+		let mut call_data: Vec<u8> = Vec::new();
+		let mut msg_selector: Vec<u8> = [0xA9, 0xE8, 0x9D, 0x26].into();
+		call_data.append(&mut msg_selector);
+		let acc = Sr25519Keyring::Bob.pair();
+		let extrinsic: OpaqueExtrinsic = create_benchmark_extrinsic(
+			self.client.as_ref(),
+			acc,
+			ContractsCall::call {
+				 dest: Address::Address32(*AccountId32::from_str(&*self.contract_addr).unwrap().as_ref()).into(),
+				 value: Default::default(),
+				 gas_limit: Default::default(),
+				 storage_deposit_limit: Default::default(),
+				 data: call_data.clone()
+			}.into(),
 			nonce,
 		)
 		.into();

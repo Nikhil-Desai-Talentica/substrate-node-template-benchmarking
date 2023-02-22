@@ -1,21 +1,12 @@
-# Substrate Node Template
+# Substrate Node Template For Benchmarking
 
-[![Try on playground](https://img.shields.io/badge/Playground-Node_Template-brightgreen?logo=Parity%20Substrate)](https://docs.substrate.io/playground/) [![Matrix](https://img.shields.io/matrix/substrate-technical:matrix.org)](https://matrix.to/#/#substrate-technical:matrix.org)
+A FRAME-based [Substrate](https://www.substrate.io/) node, with emphasis on and support for benchmarking custom pallets and smart contracts.
 
-A fresh FRAME-based [Substrate](https://www.substrate.io/) node, ready for hacking :rocket:
+Includes a custom pallet and contracts pallet along with their benchmarking code and a guide to help you benchmark your own pallets and smart contracts.
 
 ## Getting Started
 
-Follow the steps below to get started with the Node Template, or get it up and running right from
-your browser in just a few clicks using
-the [Substrate Playground](https://docs.substrate.io/playground/) :hammer_and_wrench:
-
-### Using Nix
-
-Install [nix](https://nixos.org/) and optionally [direnv](https://github.com/direnv/direnv) and
-[lorri](https://github.com/nix-community/lorri) for a fully plug and play experience for setting up
-the development environment. To get all the correct dependencies activate direnv `direnv allow` and
-lorri `lorri shell`.
+Follow the steps below to get started with the Node Template
 
 ### Rust Setup
 
@@ -202,6 +193,81 @@ A FRAME pallet is compromised of a number of blockchain primitives:
 - Errors: When a dispatchable fails, it returns an error.
 - Config: The `Config` configuration interface is used to define the types and parameters upon
   which a FRAME pallet depends.
+
+### Pallet Extrinsic benchmarking
+
+This node supports pallet extrinsic benchmarking by leveraging [frame-benchmarking-cli](https://github.com/paritytech/substrate/tree/master/utils/frame/benchmarking-cli).
+The above tool creates an empty block using sc-block-builder and then populates it with as many instances of an extrinsic as possible and runs it several times and returns the block execution time stats.
+By default, frame-benchmarking-cli only supports benchmarking two hardcoded pallet extrinsics, but has been extended to support the custom pallet and smart contract that come with this repo.
+The following steps show you how to extend it for your own pallets' extrinsics:
+
+- Once you've developed and published your pallet, you need to include it in the runtime. This can be done by following the steps below:
+
+- - Within the package [`node-template-runtime`](./runtime/Cargo.toml), add your pallet as a dependency. You can see that all the other pallets that make up the runtime are dependencies too.
+- - Within the same file, under the `features` section and within the `std` array, add the line `"<pallet-name>/std",`.
+- - Within [`lib.rs`](./runtime/src/lib.rs), configure your pallet by implementing `<pallet-name>::Config` trait with a code block that begins with `impl <pallet-name>::Config for Runtime`.
+- - Finally, compose the runtime with your pallet by way of the `construct_runtime!`.
+- - For more info, please visit [add a pallet to the runtime](https://docs.substrate.io/tutorials/work-with-pallets/add-a-pallet/).
+
+- frame-benchmarking-cli expects us to implement the `frame_benchmarking_cli::ExtrinsicBuilder` trait for each extrinsic that we want to benchmark. Now that you've added your pallet to the runtime, let's extend the frame-benchmarking-cli to support your pallets' extrinsics by following the steps below:
+
+- - Within [`benchmarking.rs`](./node/src/benchmarking.rs), create a struct whose fields are a client and any arguments the extrinsic expects. Implement the `frame_benchmarking_cli::ExtrinsicBuilder` trait on this struct. The `fn build(&self, nonce: u32) -> std::result::Result<OpaqueExtrinsic, &'static str>` method of this trait is used by the frame-benchmarking-cli tool internally to create instances of an extrinsic and populate a block.
+
+- - Remember to implement rest of the functions that comprise the aforementioned trait.
+
+- - Within [`command.rs`](./node/src/command.rs), inside the `BenchmarkCmd::Extrinsic(cmd)` code block and within the `ext_factory` vec, construct a new box with an instance of the above defined struct. The `ext_factory` vector holds a Boxed instance of every struct that implements the aforementioned trait.
+
+- benchmark your pallets' extrinsic using the following command, `./target/release/node-template benchmark extrinsic --pallet <pallet-name> --extrinsic <extrinsic-name>`. This command outputs the block execution time(in nanoseconds) stats and also the number of extrinsic instances included in a block. Dividing the average block execution time by number of extrinsics per block gives you the average time taken(in nanoseconds) to execute an extrinisic.
+
+Note:
+A [`sample pallet`](./pallets/) and the required trait implementation to make it work with the frame-benchmarking-cli are included for your reference.
+### Ink! smartcontract benchmarking
+
+This node's runtime is composed of many pallets and one of them, [`pallet-contracts`](https://docs.rs/pallet-contracts/latest/pallet_contracts/) is capable of executing WASM code.[Ink!](https://use.ink/) smartcontracts are compiled to WASM and are uploaded, instantiated and invoked using `pallet-contracts`.
+
+`pallet-contracts` exposes a few extrinsics and `Call` is the one to use to invoke a WASM smartcontract.
+It takes the smartcontract address, the amount of funds to be transferred to the smartcontract, the max gas limit for the txn execution, the storage deposit limit and a byte vector as it's arguments.
+The last argument, a byte vector, is where we specify the public function to invoke and the arguments to invoke it with.
+
+As Ink! smartcontracts are executed by a pallet, we can use the same tool as above, frame-benchmarking-cli to benchmark the contracts' public functions. This can be done by following the steps below:
+
+- Develop an Ink! smartcontract and compile it. For more info on how to do this, please refer to [develop Ink! smartcontracts](https://use.ink/getting-started/creating-an-ink-project/) and [compile Ink! smartcontracts](https://use.ink/getting-started/building-your-contract).
+
+- You need two pieces of data at the very least, the address of the smartcontract and the byte vector that encodes both, the public function you wish to call and the arguments you wish to pass to it.
+
+- Upon successfully compiling your smartcontract, navigate to `<contract-name-folder>/target/ink/` and open the `<contract-name.json>` file. This JSON represents the structure of your contract, it's constructors, public functions, types, events and other pieces.
+public functions are referred to as messages and every message has a label(function name), for e.g., `"label": "get_num",` and a selector(function hash/ID), for e.g., `"selector": "0xcfe39fc5"`. This selector is what needs to be included in the byte vector. So, for e.g., if we wish to invoke `get_num` function whose selector is `0xcfe39fc5`, we need to pass the selector as a byte vector i.e., `vec![0xCF, 0xE3, 0x9f, 0xC5]`.
+
+- We also need to pass in any arguments that a function might expect as [`SCALE`](https://lib.rs/crates/parity-scale-codec)-encoded byte vector, so in case a function, with selector `0xfbaf91e1` takes in an i64 value(say 100 for example) as an argument, our byte vector argument can be constructed using the following snippet of code,
+`let mut call_data: Vec<u8> = Vec::new();`
+`let mut msg_selector: Vec<u8> = [0xFB, 0xAF, 0x91, 0xE1].into();`
+`let mut msg_args = 100u64.encode();`
+`call_data.append(&mut msg_selector);`
+`call_data.append(&mut msg_args);`
+Note: encode() is a function that comes from the SCALE codec library and has encodings defined for most of the primitives. See [this](https://lib.rs/crates/scale-info) for more info.
+
+- Start this node and deploy your contract. For more info on how to deploy your contract, please refer to [deploy Ink! smartcontracts](https://use.ink/getting-started/deploy-your-contract).
+
+- Optionally, you can test it using the same UI mentioned in the link above by following the link [interact with Ink! smartcontracts](https://use.ink/getting-started/calling-your-contract).
+
+- Once you've created an instance of your smartcontract, you can see it's address in the [contracts-UI](https://contracts-ui.substrate.io/). Copy that into the file [`contract_address.txt`](./contract_address.txt).
+
+- Now we have the two essential arguments to pass to the `pallet-contracts::Call` and as for the rest of the arguments, `Default::default()` makes sense. From here on, the process is the same as what we followed for `Pallet Extrinsic benchmarking` section.
+
+- An extrinsic that calls a public function of a smartcontract is actually represented by a `pallet-contracts::Call` extrinsic with the `dest` argument being your smartcontract address and the `data` argument being a byte vector constructed by appending the byte vector representation of the public function's selector and the SCALE-encoded representations of each of the arguments to be passed to that public function in the exact order.
+
+- frame-benchmarking-cli expects us to implement the `frame_benchmarking_cli::ExtrinsicBuilder` trait for each extrinsic that we want to benchmark. Let's extend the frame-benchmarking-cli to support your smartcontracts' public function by following the steps below:
+
+- - Within [`benchmarking.rs`](./node/src/benchmarking.rs), create a struct whose fields are a client, address of the smartcontract instance and any arguments the function expects. Implement the `frame_benchmarking_cli::ExtrinsicBuilder` trait on this struct.
+
+- - Remember to implement rest of the functions that comprise the aforementioned trait.
+
+- - Within [`command.rs`](./node/src/command.rs), inside the `BenchmarkCmd::Extrinsic(cmd)` code block and within the `ext_factory` vec, construct a new box with an instance of the above defined struct.
+
+- benchmark your smartcontracts' function using the following command, `./target/release/node-template benchmark extrinsic --pallet <pallet-name> --extrinsic <extrinsic-name>`. This command outputs the block execution time(in nanoseconds) stats and also the number of extrinsic instances included in a block. Dividing the average block execution time by number of extrinsics per block gives you the average time taken(in nanoseconds) to execute an extrinisic.
+
+Note:
+A [`sample Ink! smartcontract`](./test/) and the required trait implementation to make it work with the frame-benchmarking-cli are included for your reference.
 
 ### Run in Docker
 

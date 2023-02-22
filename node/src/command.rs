@@ -1,5 +1,5 @@
 use crate::{
-	benchmarking::{inherent_benchmark_data, RemarkBuilder, TransferKeepAliveBuilder, SetNameBuilder, UpdateSomeNumBuilder, GetSomeNumBuilder},
+	benchmarking::{inherent_benchmark_data, RemarkBuilder, TransferKeepAliveBuilder, SetNameBuilder, UpdateSomeNumBuilder, GetSomeNumBuilder, UpdateSomeStrBuilder, GetSomeStrBuilder, InkUpdateNumBuilder, InkGetNumBuilder,InkUpdateSBuilder, InkGetSBuilder},
 	chain_spec,
 	cli::{Cli, Subcommand},
 	service,
@@ -9,6 +9,13 @@ use node_template_runtime::{Block, EXISTENTIAL_DEPOSIT};
 use sc_cli::{ChainSpec, RuntimeVersion, SubstrateCli};
 use sc_service::PartialComponents;
 use sp_keyring::Sr25519Keyring;
+use std::fs;
+
+fn read_contract_address() -> String {
+	let contents = fs::read_to_string("./contract_address.txt").expect("failed to read 'contract_address.txt'");
+	println!("{}", contents);
+	contents.trim().into()
+}
 
 impl SubstrateCli for Cli {
 	fn impl_name() -> String {
@@ -184,10 +191,31 @@ pub fn run() -> sc_cli::Result<()> {
 							)),
 							Box::new(UpdateSomeNumBuilder::new(
 								client.clone(),
-								u64::MAX,
 							)),
 							Box::new(GetSomeNumBuilder::new(
 								client.clone(),
+							)),
+							Box::new(UpdateSomeStrBuilder::new(
+								client.clone(),
+							)),
+							Box::new(GetSomeStrBuilder::new(
+								client.clone(),
+							)),
+							Box::new(InkUpdateNumBuilder::new(
+								client.clone(),
+								read_contract_address(),
+							)),
+							Box::new(InkGetNumBuilder::new(
+								client.clone(),
+								read_contract_address(),
+							)),
+							Box::new(InkUpdateSBuilder::new(
+								client.clone(),
+								read_contract_address(),
+							)),
+							Box::new(InkGetSBuilder::new(
+								client.clone(),
+								read_contract_address(),
 							)),
 						]);
 
