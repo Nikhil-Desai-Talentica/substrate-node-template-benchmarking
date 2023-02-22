@@ -203,19 +203,19 @@ The following steps show you how to extend it for your own pallets' extrinsics:
 
 - Once you've developed and published your pallet, you need to include it in the runtime. This can be done by following the steps below:
 
-- - Within the package [`node-template-runtime`](./runtime/Cargo.toml), add your pallet as a dependency. You can see that all the other pallets that make up the runtime are dependencies too.
-- - Within the same file, under the `features` section and within the `std` array, add the line `"<pallet-name>/std",`.
-- - Within [`lib.rs`](./runtime/src/lib.rs), configure your pallet by implementing `<pallet-name>::Config` trait with a code block that begins with `impl <pallet-name>::Config for Runtime`.
-- - Finally, compose the runtime with your pallet by way of the `construct_runtime!`.
-- - For more info, please visit [add a pallet to the runtime](https://docs.substrate.io/tutorials/work-with-pallets/add-a-pallet/).
+  - Within the package [`node-template-runtime`](./runtime/Cargo.toml), add your pallet as a dependency. You can see that all the other pallets that make up the runtime are dependencies too.
+  - Within the same file, under the `features` section and within the `std` array, add the line `"<pallet-name>/std",`.
+  - Within [`lib.rs`](./runtime/src/lib.rs), configure your pallet by implementing `<pallet-name>::Config` trait with a code block that begins with `impl <pallet-name>::Config for Runtime`.
+  - Finally, compose the runtime with your pallet by way of the `construct_runtime!`.
+  - For more info, please visit [add a pallet to the runtime](https://docs.substrate.io/tutorials/work-with-pallets/add-a-pallet/).
 
 - frame-benchmarking-cli expects us to implement the `frame_benchmarking_cli::ExtrinsicBuilder` trait for each extrinsic that we want to benchmark. Now that you've added your pallet to the runtime, let's extend the frame-benchmarking-cli to support your pallets' extrinsics by following the steps below:
 
-- - Within [`benchmarking.rs`](./node/src/benchmarking.rs), create a struct whose fields are a client and any arguments the extrinsic expects. Implement the `frame_benchmarking_cli::ExtrinsicBuilder` trait on this struct. The `fn build(&self, nonce: u32) -> std::result::Result<OpaqueExtrinsic, &'static str>` method of this trait is used by the frame-benchmarking-cli tool internally to create instances of an extrinsic and populate a block.
+  - Within [`benchmarking.rs`](./node/src/benchmarking.rs), create a struct whose fields are a client and any arguments the extrinsic expects. Implement the `frame_benchmarking_cli::ExtrinsicBuilder` trait on this struct. The `fn build(&self, nonce: u32) -> std::result::Result<OpaqueExtrinsic, &'static str>` method of this trait is used by the frame-benchmarking-cli tool internally to create instances of an extrinsic and populate a block.
 
-- - Remember to implement rest of the functions that comprise the aforementioned trait.
+  - Remember to implement rest of the functions that comprise the aforementioned trait.
 
-- - Within [`command.rs`](./node/src/command.rs), inside the `BenchmarkCmd::Extrinsic(cmd)` code block and within the `ext_factory` vec, construct a new box with an instance of the above defined struct. The `ext_factory` vector holds a Boxed instance of every struct that implements the aforementioned trait.
+  - Within [`command.rs`](./node/src/command.rs), inside the `BenchmarkCmd::Extrinsic(cmd)` code block and within the `ext_factory` vec, construct a new box with an instance of the above defined struct. The `ext_factory` vector holds a Boxed instance of every struct that implements the aforementioned trait.
 
 - benchmark your pallets' extrinsic using the following command, `./target/release/node-template benchmark extrinsic --pallet <pallet-name> --extrinsic <extrinsic-name>`. This command outputs the block execution time(in nanoseconds) stats and also the number of extrinsic instances included in a block. Dividing the average block execution time by number of extrinsics per block gives you the average time taken(in nanoseconds) to execute an extrinisic.
 
@@ -258,11 +258,11 @@ Note: encode() is a function that comes from the SCALE codec library and has enc
 
 - frame-benchmarking-cli expects us to implement the `frame_benchmarking_cli::ExtrinsicBuilder` trait for each extrinsic that we want to benchmark. Let's extend the frame-benchmarking-cli to support your smartcontracts' public function by following the steps below:
 
-- - Within [`benchmarking.rs`](./node/src/benchmarking.rs), create a struct whose fields are a client, address of the smartcontract instance and any arguments the function expects. Implement the `frame_benchmarking_cli::ExtrinsicBuilder` trait on this struct.
+  - Within [`benchmarking.rs`](./node/src/benchmarking.rs), create a struct whose fields are a client, address of the smartcontract instance and any arguments the function expects. Implement the `frame_benchmarking_cli::ExtrinsicBuilder` trait on this struct.
 
-- - Remember to implement rest of the functions that comprise the aforementioned trait.
+  - Remember to implement rest of the functions that comprise the aforementioned trait.
 
-- - Within [`command.rs`](./node/src/command.rs), inside the `BenchmarkCmd::Extrinsic(cmd)` code block and within the `ext_factory` vec, construct a new box with an instance of the above defined struct.
+  - Within [`command.rs`](./node/src/command.rs), inside the `BenchmarkCmd::Extrinsic(cmd)` code block and within the `ext_factory` vec, construct a new box with an instance of the above defined struct.
 
 - benchmark your smartcontracts' function using the following command, `./target/release/node-template benchmark extrinsic --pallet <pallet-name> --extrinsic <extrinsic-name>`. This command outputs the block execution time(in nanoseconds) stats and also the number of extrinsic instances included in a block. Dividing the average block execution time by number of extrinsics per block gives you the average time taken(in nanoseconds) to execute an extrinisic.
 
