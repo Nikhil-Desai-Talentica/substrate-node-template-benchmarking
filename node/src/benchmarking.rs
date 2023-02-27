@@ -18,11 +18,13 @@ use std::{sync::Arc, time::Duration, str::FromStr};
 use rand::{thread_rng, Rng};
 use rand::distributions::Alphanumeric;
 
+// generate a random integer
 fn generate_random_integer() -> i64 {
 	let mut trng = thread_rng();
 	trng.gen()
 }
 
+// generate a random string of alphanumeric characters of length 100
 fn generate_random_string() -> String {
 	let trng = thread_rng();
 	let length: usize = 100;
@@ -155,6 +157,10 @@ impl frame_benchmarking_cli::ExtrinsicBuilder for SetNameBuilder {
 	}
 }
 
+/// Generates `Template::UpdateSomeNum` extrinsics for the benchmarks.
+///
+/// Note: Should only be used for benchmarking.
+/// A random integer is generated and passed as an argument.
 pub struct UpdateSomeNumBuilder {
 	client: Arc<FullClient>,
 }
@@ -191,6 +197,9 @@ impl frame_benchmarking_cli::ExtrinsicBuilder for UpdateSomeNumBuilder {
 	}
 }
 
+/// Generates `Template::GetSomeNum` extrinsics for the benchmarks.
+///
+/// Note: Should only be used for benchmarking.
 pub struct GetSomeNumBuilder {
 	client: Arc<FullClient>,
 }
@@ -225,6 +234,10 @@ impl frame_benchmarking_cli::ExtrinsicBuilder for GetSomeNumBuilder {
 	}
 }
 
+/// Generates `Template::UpdateSomeStr` extrinsics for the benchmarks.
+///
+/// Note: Should only be used for benchmarking.
+/// A random alphanumeric string is generated and passed as an argument.
 pub struct UpdateSomeStrBuilder {
 	client: Arc<FullClient>,
 }
@@ -262,6 +275,9 @@ impl frame_benchmarking_cli::ExtrinsicBuilder for UpdateSomeStrBuilder {
 	}
 }
 
+/// Generates `Template::GetSomeStr` extrinsics for the benchmarks.
+///
+/// Note: Should only be used for benchmarking.
 pub struct GetSomeStrBuilder {
 	client: Arc<FullClient>,
 }
@@ -296,6 +312,10 @@ impl frame_benchmarking_cli::ExtrinsicBuilder for GetSomeStrBuilder {
 	}
 }
 
+/// Generates `Contracts::Call` extrinsics that represents calling the `test` contracts `update_num` message/function for the benchmarks.
+///
+/// Note: Should only be used for benchmarking.
+/// generates a random integer and passes it as an argument.
 pub struct InkUpdateNumBuilder {
 	client: Arc<FullClient>,
 	contract_addr: String,
@@ -318,8 +338,11 @@ impl frame_benchmarking_cli::ExtrinsicBuilder for InkUpdateNumBuilder {
 
 	fn build(&self, nonce: u32) -> std::result::Result<OpaqueExtrinsic, &'static str> {
 		let mut call_data: Vec<u8> = Vec::new();
+		// `msg_selector` identifies the message to be invoked
 		let mut msg_selector: Vec<u8> = [0xFB, 0xAF, 0x91, 0xE1].into();
+		// `msg_args` are the SCALE-encoded args to be passed to the above message
 		let mut msg_args = generate_random_integer().encode();
+		// construct a call to a specific message with the arguments
 		call_data.append(&mut msg_selector);
 		call_data.append(&mut msg_args);
 		let acc = Sr25519Keyring::Bob.pair();
@@ -341,6 +364,9 @@ impl frame_benchmarking_cli::ExtrinsicBuilder for InkUpdateNumBuilder {
 	}
 }
 
+/// Generates `Contracts::Call` extrinsics that represents calling the `test` contracts `get_num` message/function for the benchmarks.
+///
+/// Note: Should only be used for benchmarking.
 pub struct InkGetNumBuilder {
 	client: Arc<FullClient>,
 	contract_addr: String,
@@ -363,7 +389,9 @@ impl frame_benchmarking_cli::ExtrinsicBuilder for InkGetNumBuilder {
 
 	fn build(&self, nonce: u32) -> std::result::Result<OpaqueExtrinsic, &'static str> {
 		let mut call_data: Vec<u8> = Vec::new();
+		// `msg_selector` identifies the message to be invoked
 		let mut msg_selector: Vec<u8> = [0xCF, 0xE3, 0x9F, 0xC5].into();
+		// construct a call to a specific message with the arguments
 		call_data.append(&mut msg_selector);
 		let acc = Sr25519Keyring::Bob.pair();
 		let extrinsic: OpaqueExtrinsic = create_benchmark_extrinsic(
@@ -383,6 +411,11 @@ impl frame_benchmarking_cli::ExtrinsicBuilder for InkGetNumBuilder {
 		Ok(extrinsic)
 	}
 }
+
+/// Generates `Contracts::Call` extrinsics that represents calling the `test` contracts `update_s` message/function for the benchmarks.
+///
+/// Note: Should only be used for benchmarking.
+/// generates a random alphanumeric string and passes it as an argument.
 pub struct InkUpdateSBuilder {
 	client: Arc<FullClient>,
 	contract_addr: String,
@@ -405,8 +438,11 @@ impl frame_benchmarking_cli::ExtrinsicBuilder for InkUpdateSBuilder {
 
 	fn build(&self, nonce: u32) -> std::result::Result<OpaqueExtrinsic, &'static str> {
 		let mut call_data: Vec<u8> = Vec::new();
+		// `msg_selector` identifies the message to be invoked
 		let mut msg_selector: Vec<u8> = [0x90, 0xC9, 0xB3, 0xF8].into();
+		// `msg_args` are the SCALE-encoded args to be passed to the above message
 		let mut msg_args = generate_random_string().encode();
+		// construct a call to a specific message with the arguments
 		call_data.append(&mut msg_selector);
 		call_data.append(&mut msg_args);
 		let acc = Sr25519Keyring::Bob.pair();
@@ -428,6 +464,9 @@ impl frame_benchmarking_cli::ExtrinsicBuilder for InkUpdateSBuilder {
 	}
 }
 
+/// Generates `Contracts::Call` extrinsics that represents calling the `test` contracts `get_s` message/function for the benchmarks.
+///
+/// Note: Should only be used for benchmarking.
 pub struct InkGetSBuilder {
 	client: Arc<FullClient>,
 	contract_addr: String,
@@ -450,7 +489,9 @@ impl frame_benchmarking_cli::ExtrinsicBuilder for InkGetSBuilder {
 
 	fn build(&self, nonce: u32) -> std::result::Result<OpaqueExtrinsic, &'static str> {
 		let mut call_data: Vec<u8> = Vec::new();
+		// `msg_selector` identifies the message to be invoked
 		let mut msg_selector: Vec<u8> = [0xA9, 0xE8, 0x9D, 0x26].into();
+		// construct a call to a specific message with the arguments
 		call_data.append(&mut msg_selector);
 		let acc = Sr25519Keyring::Bob.pair();
 		let extrinsic: OpaqueExtrinsic = create_benchmark_extrinsic(

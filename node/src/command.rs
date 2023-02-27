@@ -177,7 +177,7 @@ pub fn run() -> sc_cli::Result<()> {
 					},
 					BenchmarkCmd::Extrinsic(cmd) => {
 						let PartialComponents { client, .. } = service::new_partial(&config)?;
-						// Register the *Remark* and *TKA* builders.
+						// Register a few extrinsic builders so the CLI can iterate over and choose the right extrinsic builder that matches the one chosen by the user.
 						let ext_factory = ExtrinsicFactory(vec![
 							Box::new(RemarkBuilder::new(client.clone())),
 							Box::new(TransferKeepAliveBuilder::new(

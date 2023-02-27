@@ -27,10 +27,12 @@ pub mod pallet {
 
 	// The pallet's runtime storage items.
 	// https://docs.substrate.io/main-docs/build/runtime-storage/
+	// `SomeNum` stores an integer
 	#[pallet::storage]
 	#[pallet::getter(fn some_num)]
 	pub type SomeNum<T> = StorageValue<_, i64>;
 
+	// `SomeStr` stores a byte vector of arbitrary length
 	#[pallet::storage]
 	#[pallet::getter(fn some_str)]
 	pub type SomeStr<T> = StorageValue<_, Vec<u8>>;
@@ -40,7 +42,9 @@ pub mod pallet {
 	#[pallet::event]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
 	pub enum Event<T: Config> {
+		// Event emitted when the value of `SomeNum` is changed
 		NumChanged {old: i64, new: i64},
+		// Event emitted when the value of `SomeStr` is changed
 		StrChanged,
 	}
 
@@ -55,6 +59,7 @@ pub mod pallet {
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
 
+		// Change the value of `SomeNum` to the passed in `value`
 		#[pallet::call_index(0)]
 		#[pallet::weight(10_000 + T::DbWeight::get().writes(1).ref_time())]
 		pub fn update_some_num(origin: OriginFor<T>, value: i64) -> DispatchResult {
@@ -76,6 +81,7 @@ pub mod pallet {
 			Ok(())
 		}
 
+		// Read the value of `SomeNum`
 		#[pallet::call_index(1)]
 		#[pallet::weight(10_000 + T::DbWeight::get().reads(1).ref_time())]
 		pub fn get_some_num(origin: OriginFor<T>) -> DispatchResult {
@@ -88,6 +94,7 @@ pub mod pallet {
 			Ok(())
 		}
 
+		// Change the value of `SomeStr` to the value passed in as `new_str`
 		#[pallet::call_index(2)]
 		#[pallet::weight(50_000_000)]
 		pub fn update_some_str(origin: OriginFor<T>, new_str: Vec<u8>) -> DispatchResult {
@@ -104,6 +111,7 @@ pub mod pallet {
 			Ok(())
 		}
 
+		// Read the value contained in `SomeStr`
 		#[pallet::call_index(3)]
 		#[pallet::weight(50_000_000)]
 		pub fn get_some_str(origin: OriginFor<T>) -> DispatchResult {

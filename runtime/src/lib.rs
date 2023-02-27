@@ -496,6 +496,7 @@ construct_runtime!(
 		Nicks: pallet_nicks,
 		TransactionPayment: pallet_transaction_payment,
 		Sudo: pallet_sudo,
+		// Include pallet-contracts so we can execute and benchmark them.
 		Contracts: pallet_contracts,
 		Assets: pallet_assets,
 		// Include the custom logic from the pallet-template in the runtime.
