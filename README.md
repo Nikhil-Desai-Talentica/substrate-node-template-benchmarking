@@ -29,6 +29,17 @@ without launching it:
 cargo build --release
 ```
 
+### Benchmark
+
+Use the following command to list out all the extrinsics you can benchmark:
+```sh
+./target/release/node-template benchmark extrinsic --list
+```
+
+and use the following command to benchmark a pallet extrinsic, or a smartcontract's public function:
+```sh
+./target/release/node-template benchmark extrinsic --pallet <name of pallet/smartcontract as per the trait> --extrinsic <name of the extrinsic/function as per the trait>
+```
 ### Embedded Docs
 
 Once the project has been built, the following command can be used to explore all parameters and
