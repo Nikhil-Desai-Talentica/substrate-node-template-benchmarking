@@ -35,6 +35,18 @@ fn generate_random_string() -> String {
                 .collect()
 }
 
+fn hex_string_to_bytes(s: &String) -> Option<Vec<u8>> {
+    if s.len() % 2 == 0 {
+        (0..s.len())
+            .step_by(2)
+            .map(|i| s.get(i..i + 2)
+                      .and_then(|sub| u8::from_str_radix(sub, 16).ok()))
+            .collect()
+    } else {
+        None
+    }
+}
+
 /// Generates extrinsics for the `benchmark overhead` command.
 ///
 /// Note: Should only be used for benchmarking.
@@ -493,6 +505,174 @@ impl frame_benchmarking_cli::ExtrinsicBuilder for InkGetSBuilder {
 		let mut msg_selector: Vec<u8> = [0xA9, 0xE8, 0x9D, 0x26].into();
 		// construct a call to a specific message with the arguments
 		call_data.append(&mut msg_selector);
+		let acc = Sr25519Keyring::Bob.pair();
+		let extrinsic: OpaqueExtrinsic = create_benchmark_extrinsic(
+			self.client.as_ref(),
+			acc,
+			ContractsCall::call {
+				 dest: Address::Address32(*AccountId32::from_str(&*self.contract_addr).unwrap().as_ref()).into(),
+				 value: Default::default(),
+				 gas_limit: Default::default(),
+				 storage_deposit_limit: Default::default(),
+				 data: call_data.clone()
+			}.into(),
+			nonce,
+		)
+		.into();
+
+		Ok(extrinsic)
+	}
+}
+
+pub struct SoliditySetSomeNumBuilder {
+	client: Arc<FullClient>,
+	contract_addr: String,
+}
+
+impl SoliditySetSomeNumBuilder {
+	pub fn new(client: Arc<FullClient>, contract_addr: String) -> Self {
+		Self {client, contract_addr}
+	}
+}
+
+impl frame_benchmarking_cli::ExtrinsicBuilder for SoliditySetSomeNumBuilder {
+	fn pallet(&self) -> &str {
+		"solidity_wasm"
+	}
+
+	fn extrinsic(&self) -> &str {
+		"set_some_num"
+	}
+
+	fn build(&self, nonce: u32) -> std::result::Result<OpaqueExtrinsic, &'static str> {
+		let call_data_str = String::from("9ac1762f00000000000000000000000000000000000000000000000000000000000002d9");
+		let call_data: Vec<u8> = hex_string_to_bytes(&call_data_str).unwrap();
+		let acc = Sr25519Keyring::Bob.pair();
+		let extrinsic: OpaqueExtrinsic = create_benchmark_extrinsic(
+			self.client.as_ref(),
+			acc,
+			ContractsCall::call {
+				 dest: Address::Address32(*AccountId32::from_str(&*self.contract_addr).unwrap().as_ref()).into(),
+				 value: Default::default(),
+				 gas_limit: Default::default(),
+				 storage_deposit_limit: Default::default(),
+				 data: call_data.clone()
+			}.into(),
+			nonce,
+		)
+		.into();
+
+		Ok(extrinsic)
+	}
+}
+
+pub struct SolidityGetSomeNumBuilder {
+	client: Arc<FullClient>,
+	contract_addr: String,
+}
+
+impl SolidityGetSomeNumBuilder {
+	pub fn new(client: Arc<FullClient>, contract_addr: String) -> Self {
+		Self {client, contract_addr}
+	}
+}
+
+impl frame_benchmarking_cli::ExtrinsicBuilder for SolidityGetSomeNumBuilder {
+	fn pallet(&self) -> &str {
+		"solidity_wasm"
+	}
+
+	fn extrinsic(&self) -> &str {
+		"get_some_num"
+	}
+
+	fn build(&self, nonce: u32) -> std::result::Result<OpaqueExtrinsic, &'static str> {
+		let call_data_str = String::from("b40a136b");
+		let call_data: Vec<u8> = hex_string_to_bytes(&call_data_str).unwrap();
+		let acc = Sr25519Keyring::Bob.pair();
+		let extrinsic: OpaqueExtrinsic = create_benchmark_extrinsic(
+			self.client.as_ref(),
+			acc,
+			ContractsCall::call {
+				 dest: Address::Address32(*AccountId32::from_str(&*self.contract_addr).unwrap().as_ref()).into(),
+				 value: Default::default(),
+				 gas_limit: Default::default(),
+				 storage_deposit_limit: Default::default(),
+				 data: call_data.clone()
+			}.into(),
+			nonce,
+		)
+		.into();
+
+		Ok(extrinsic)
+	}
+}
+
+pub struct SoliditySetSomeStrBuilder {
+	client: Arc<FullClient>,
+	contract_addr: String,
+}
+
+impl SoliditySetSomeStrBuilder {
+	pub fn new(client: Arc<FullClient>, contract_addr: String) -> Self {
+		Self {client, contract_addr}
+	}
+}
+
+impl frame_benchmarking_cli::ExtrinsicBuilder for SoliditySetSomeStrBuilder {
+	fn pallet(&self) -> &str {
+		"solidity_wasm"
+	}
+
+	fn extrinsic(&self) -> &str {
+		"set_some_str"
+	}
+
+	fn build(&self, nonce: u32) -> std::result::Result<OpaqueExtrinsic, &'static str> {
+		let call_data_str = String::from("0583a02c0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000001a536f6c6964697479207761736d206f6e20737562737472617465000000000000");
+		let call_data: Vec<u8> = hex_string_to_bytes(&call_data_str).unwrap();
+		let acc = Sr25519Keyring::Bob.pair();
+		let extrinsic: OpaqueExtrinsic = create_benchmark_extrinsic(
+			self.client.as_ref(),
+			acc,
+			ContractsCall::call {
+				 dest: Address::Address32(*AccountId32::from_str(&*self.contract_addr).unwrap().as_ref()).into(),
+				 value: Default::default(),
+				 gas_limit: Default::default(),
+				 storage_deposit_limit: Default::default(),
+				 data: call_data.clone()
+			}.into(),
+			nonce,
+		)
+		.into();
+
+		Ok(extrinsic)
+	}
+}
+
+pub struct SolidityGetSomeStrBuilder {
+	client: Arc<FullClient>,
+	contract_addr: String,
+}
+
+impl SolidityGetSomeStrBuilder {
+	pub fn new(client: Arc<FullClient>, contract_addr: String) -> Self {
+		Self {client, contract_addr}
+	}
+}
+
+impl frame_benchmarking_cli::ExtrinsicBuilder for SolidityGetSomeStrBuilder {
+	fn pallet(&self) -> &str {
+		"solidity_wasm"
+	}
+
+	fn extrinsic(&self) -> &str {
+		"get_some_str"
+	}
+
+	fn build(&self, nonce: u32) -> std::result::Result<OpaqueExtrinsic, &'static str> {
+		let call_data_str = String::from("5e9c155e");
+		let call_data: Vec<u8> = hex_string_to_bytes(&call_data_str).unwrap();
 		let acc = Sr25519Keyring::Bob.pair();
 		let extrinsic: OpaqueExtrinsic = create_benchmark_extrinsic(
 			self.client.as_ref(),

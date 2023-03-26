@@ -1,5 +1,5 @@
 use crate::{
-	benchmarking::{inherent_benchmark_data, RemarkBuilder, TransferKeepAliveBuilder, SetNameBuilder, UpdateSomeNumBuilder, GetSomeNumBuilder, UpdateSomeStrBuilder, GetSomeStrBuilder, InkUpdateNumBuilder, InkGetNumBuilder,InkUpdateSBuilder, InkGetSBuilder},
+	benchmarking::{inherent_benchmark_data, RemarkBuilder, TransferKeepAliveBuilder, SetNameBuilder, UpdateSomeNumBuilder, GetSomeNumBuilder, UpdateSomeStrBuilder, GetSomeStrBuilder, InkUpdateNumBuilder, InkGetNumBuilder,InkUpdateSBuilder, InkGetSBuilder, SoliditySetSomeNumBuilder, SolidityGetSomeNumBuilder, SoliditySetSomeStrBuilder, SolidityGetSomeStrBuilder},
 	chain_spec,
 	cli::{Cli, Subcommand},
 	service,
@@ -214,6 +214,22 @@ pub fn run() -> sc_cli::Result<()> {
 								read_contract_address(),
 							)),
 							Box::new(InkGetSBuilder::new(
+								client.clone(),
+								read_contract_address(),
+							)),
+							Box::new(SoliditySetSomeNumBuilder::new(
+								client.clone(),
+								read_contract_address(),
+							)),
+							Box::new(SolidityGetSomeNumBuilder::new(
+								client.clone(),
+								read_contract_address(),
+							)),
+							Box::new(SoliditySetSomeStrBuilder::new(
+								client.clone(),
+								read_contract_address(),
+							)),
+							Box::new(SolidityGetSomeStrBuilder::new(
 								client.clone(),
 								read_contract_address(),
 							)),
