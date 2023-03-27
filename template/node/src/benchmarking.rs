@@ -19,20 +19,37 @@
 //! Contains code to setup the command invocations in [`super::command`] which would
 //! otherwise bloat that module.
 
-use std::{sync::Arc, time::Duration};
+use std::{sync::Arc, time::Duration, str::FromStr};
 
 use scale_codec::Encode;
 // Substrate
 use sc_cli::Result;
 use sc_client_api::BlockBackend;
-use sp_core::{sr25519, Pair};
+use sp_core::{sr25519, Pair, H160, U256};
 use sp_inherents::{InherentData, InherentDataProvider};
 use sp_keyring::Sr25519Keyring;
 use sp_runtime::{generic::Era, AccountId32, OpaqueExtrinsic, SaturatedConversion};
 // Frontier
-use frontier_template_runtime::{self as runtime, AccountId, Balance, BalancesCall, SystemCall};
+use frontier_template_runtime::{self as runtime, AccountId, Balance, BalancesCall, SystemCall, EvmCall};
 
 use crate::client::Client;
+
+fn str_to_h160(s: &String) -> H160 {
+	let s_str = s.as_str();
+	return H160::from_str(s_str).unwrap();
+}
+
+fn hex_string_to_bytes(s: &String) -> Option<Vec<u8>> {
+    if s.len() % 2 == 0 {
+        (0..s.len())
+            .step_by(2)
+            .map(|i| s.get(i..i + 2)
+                      .and_then(|sub| u8::from_str_radix(sub, 16).ok()))
+            .collect()
+    } else {
+        None
+    }
+}
 
 /// Generates extrinsics for the `benchmark overhead` command.
 ///
@@ -118,6 +135,66 @@ impl frame_benchmarking_cli::ExtrinsicBuilder for TransferKeepAliveBuilder {
 	}
 }
 
+// Generates a EvmCall::call that represents a generic call.
+// source is the Ethereum-type address that's making the call.
+// target is the address of the contract that this message will be sent to.
+// input is the call data sent to the native solidity contract that determines which solidity function gets invoked and the arguments that get passed in.
+// input is read from `input.txt` and hence, this call is generic and can represent invoking any solidity function with any arguments depending upon the contents of `input.txt`.
+pub struct NativeSolidityGenericCallBuilder {
+	client: Arc<Client>,
+	source: String,
+	target: String,
+	input: String,
+	pallet_name: &'static str,
+	extrinsic_name: &'static str,
+}
+
+impl NativeSolidityGenericCallBuilder {
+	pub fn new(client: Arc<Client>, source: String, target: String, input: String, pallet_name: &'static str, extrinsic_name: &'static str) -> Self {
+		Self {
+			client,
+			source,
+			target,
+			input,
+			pallet_name,
+			extrinsic_name,
+		}
+	}
+}
+
+impl frame_benchmarking_cli::ExtrinsicBuilder for NativeSolidityGenericCallBuilder {
+	fn pallet(&self) -> &str {
+		self.pallet_name.into()
+	}
+
+	fn extrinsic(&self) -> &str {
+		self.extrinsic_name.into()
+	}
+
+	fn build(&self, nonce: u32) -> std::result::Result<OpaqueExtrinsic, &'static str> {
+		let acc = Sr25519Keyring::Bob.pair();
+		let extrinsic: OpaqueExtrinsic = create_benchmark_extrinsic(
+			self.client.as_ref(),
+			acc,
+			EvmCall::call {
+				source: str_to_h160(&self.source),
+				target: str_to_h160(&self.target),
+				input: hex_string_to_bytes(&self.input).unwrap(),
+				value: 0.into(),
+				gas_limit: 42949672u64,
+				max_fee_per_gas: 1000000000u128.into(),
+				max_priority_fee_per_gas: Default::default(),
+				nonce: Some(U256::from(nonce+1)),
+				access_list: Default::default(),
+			}
+			.into(),
+			nonce,
+		)
+		.into();
+
+		Ok(extrinsic)
+	}
+}
 /// Create a transaction using the given `call`.
 ///
 /// Note: Should only be used for benchmarking.

@@ -28,6 +28,49 @@ use crate::{
 	service::{self, db_config_dir},
 };
 
+use std::fs;
+use std::path::Path;
+// use std::io::{prelude::*, BufReader};
+
+fn get_file_contents<P: AsRef<Path>>(file_path: P) -> String {
+	let contents = fs::read_to_string(file_path).expect("failed to read file");
+	println!("{}", contents);
+	contents.trim().into()
+}
+
+fn read_contract_address() -> String {
+	get_file_contents("./template/contract_address.txt")
+}
+
+fn read_source_address() -> String {
+	get_file_contents("./template/source_address.txt")
+}
+
+fn read_call_data() -> String {
+	get_file_contents("./template/call_data.txt")
+}
+
+// fn read_args_from_file() -> [String; 3] {
+//     let file = File::open("./template/contents.txt").unwrap();
+//     let mut reader = BufReader::new(file);
+
+//     let mut contents: [String; 3] = [
+//         String::new(),
+//         String::new(),
+//         String::new(),
+//     ];
+//     for i in 0..3 {
+//         let _ = reader.read_line(&mut contents[i]);
+//         if i < 2 {
+//             contents[i].pop();
+//         }
+//     }
+// 	for i in 0..3 {
+// 		println!("{}", contents[i]);
+// 	}
+//     contents
+// }
+
 impl SubstrateCli for Cli {
 	fn impl_name() -> String {
 		"Frontier Node".into()
@@ -149,7 +192,7 @@ pub fn run() -> sc_cli::Result<()> {
 		#[cfg(feature = "runtime-benchmarks")]
 		Some(Subcommand::Benchmark(cmd)) => {
 			use crate::benchmarking::{
-				inherent_benchmark_data, RemarkBuilder, TransferKeepAliveBuilder,
+				inherent_benchmark_data, RemarkBuilder, TransferKeepAliveBuilder, NativeSolidityGenericCallBuilder,
 			};
 			use frame_benchmarking_cli::{
 				BenchmarkCmd, ExtrinsicFactory, SUBSTRATE_REFERENCE_HARDWARE,
@@ -183,6 +226,7 @@ pub fn run() -> sc_cli::Result<()> {
 				}),
 				BenchmarkCmd::Extrinsic(cmd) => runner.sync_run(|mut config| {
 					let (client, _, _, _, _) = service::new_chain_ops(&mut config, &cli.eth)?;
+					// let file_contents = read_args_from_file();
 					// Register the *Remark* and *TKA* builders.
 					let ext_factory = ExtrinsicFactory(vec![
 						Box::new(RemarkBuilder::new(client.clone())),
@@ -190,6 +234,46 @@ pub fn run() -> sc_cli::Result<()> {
 							client.clone(),
 							sp_keyring::Sr25519Keyring::Alice.to_account_id(),
 							ExistentialDeposit::get(),
+						)),
+						Box::new(NativeSolidityGenericCallBuilder::new(
+							client.clone(),
+							read_source_address(),
+							read_contract_address(),
+							String::from("9ac1762f00000000000000000000000000000000000000000000000000000000000003e8"),
+							("native_solidity_benchmark_sample").clone(),
+							("set_some_num").clone(),
+						)),
+						Box::new(NativeSolidityGenericCallBuilder::new(
+							client.clone(),
+							read_source_address(),
+							read_contract_address(),
+							String::from("b40a136b"),
+							("native_solidity_benchmark_sample").clone(),
+							("get_some_num").clone(),
+						)),
+						Box::new(NativeSolidityGenericCallBuilder::new(
+							client.clone(),
+							read_source_address(),
+							read_contract_address(),
+							String::from("0583a02c0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000003342656e63686d61726b696e6720536f6c6964697479204e617469766520636f6e747261637473206f6e2053756273747261746500000000000000000000000000"),
+							("native_solidity_benchmark_sample").clone(),
+							("set_some_str").clone(),
+						)),
+						Box::new(NativeSolidityGenericCallBuilder::new(
+							client.clone(),
+							read_source_address(),
+							read_contract_address(),
+							String::from("5e9c155e"),
+							("native_solidity_benchmark_sample").clone(),
+							("get_some_str").clone(),
+						)),
+						Box::new(NativeSolidityGenericCallBuilder::new(
+							client.clone(),
+							read_source_address(),
+							read_contract_address(),
+							read_call_data(),
+							("native_solidity").clone(),
+							("generic_call").clone(),
 						)),
 					]);
 
