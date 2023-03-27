@@ -159,23 +159,30 @@ The following steps show you how to extend it for your own EVM based smartcontra
 
 - Start the local node, refer to `Connect to the node` section of this [`article`](https://docs.substrate.io/tutorials/integrate-with-tools/access-evm-accounts/) within the official Substrate docs.
 
-- Deploy this EVM based smartcontract by following the steps mentioned in the `Deploy a smart contract` section within the same `article` as above.
+- Deploy this EVM based smartcontract by following the steps mentioned in the `Deploy a smart contract` section within the same `article` as above. Save the contract address in [`contract_address.txt`](./template/contract_address.txt)
 
 - Verify the deployment by following the steps mentioned in the `View the smart contract` section within the same `article` as above.
 
 - Understand how a function is called by going through the `Transfer tokens` section within the same `article` as above.
 
+- Simulate a call you want to benchmark in [Remix Web IDE](https://remix.ethereum.org/) by compiling the smartcontract there and calling the same function with the same arguments. Now, expand the transaction object and copy the value pointed to by the `input` key.
+This is a hex-encoded string, however, the pallet expects a byte vector representation of the same. For this, remove the `0x` prefix and use the function `hex_string_to_bytes` that converts this string to bytes.
+
 - We need to supply the following arguments at the very least to call an EVM function, `source`, `target`, `value`, `input`, `gas_limit` and `max_fee_per_gas`. We have already described what each of these stand for.
 
 - frame-benchmarking-cli expects us to implement the `frame_benchmarking_cli::ExtrinsicBuilder` trait for each extrinsic that we want to benchmark. Let's extend the frame-benchmarking-cli to support your EVM smartcontracts' public function by following the steps below:
 
- - Within [`benchmarking.rs`](.template/node/src/benchmarking.rs), create a struct whose fields are a client, EVM-like address of the source and the deployed EVM smartcontract instance, input to be provided that encodes the function to call and the arguments to be supplied and other args. Implement the `frame_benchmarking_cli::ExtrinsicBuilder` trait on this struct.
+ - Within [`benchmarking.rs`](.template/node/src/benchmarking.rs), create a struct whose fields are a client, EVM-like address of the source and the deployed EVM smartcontract instance, input to be provided that encodes the function to call and the arguments to be supplied and other args.
+ Implement the `frame_benchmarking_cli::ExtrinsicBuilder` trait on this struct.
 
  - Remember to implement rest of the functions that comprise the aforementioned trait.
 
+ - You can leverage the `read_contract_address`, `read_source_address` and `read_call_data` functions.
+
  - Within [`command.rs`](./node/src/command.rs), inside the `BenchmarkCmd::Extrinsic(cmd)` code block and within the `ext_factory` vec, construct a new box with an instance of the above defined struct.
 
- - Alternatively, you can leverage the provided struct `NativeSolidityGenericCallBuilder` that can represent any call to an EVM smartcontract. All you need to do is store the source address in source_address.txt, contract address in contract_address.txt and the call-data/input in call_data.txt. This call-data/input can be easily obtained by simulating the same call with the same args in [Remix Web IDE](https://remix.ethereum.org/) as already mentioned in the above `article`.
+ - Alternatively, you can leverage the provided struct `NativeSolidityGenericCallBuilder` that can represent any call to an EVM smartcontract. All you need to do is store the source address in source_address.txt, contract address in contract_address.txt and the call-data/input in call_data.txt. This call-data/input can be easily obtained by simulating the same call with the same args in [Remix Web IDE](https://remix.ethereum.org/).Simulate a call you want to benchmark in [Remix Web IDE](https://remix.ethereum.org/) by compiling the smartcontract there and calling the same function with the same arguments. Now, expand the transaction object and copy the value pointed to by the `input` key.
+ This is a hex-encoded string, however, the pallet expects a byte vector representation of the same. For this, copy the hex-encoded string into [call_data.txt](./template/call_data.txt) and remove the `0x` prefix. The function `hex_string_to_bytes` converts this string to bytes.
 
 - benchmark your smartcontracts' function using the following command, `./target/release/node-template benchmark extrinsic --pallet <pallet-name> --extrinsic <extrinsic-name>`.
 `native_solidity` can be used for `<pallet-name>` and `generic_call` can be used for `<extrinic-name>` in case you choose to use `NativeSolidityGenericCallBuilder` rather than develop your own struct that implements the aforementioned trait.
