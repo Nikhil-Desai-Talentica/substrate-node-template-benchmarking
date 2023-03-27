@@ -204,3 +204,7 @@ and use the following command to benchmark a pallet extrinsic, or a smartcontrac
 ```sh
 ./target/release/frontier-template-node benchmark extrinsic --pallet <name of smartcontract as per the trait> --extrinsic <name of the smartcontract-function as per the trait>
 ```
+
+### Benchmark results and demo
+A walkthrough of the above process is recorded and is available [here](https://talenticaall-my.sharepoint.com/:v:/g/personal/nikhil_desai_talentica_com/Ea_GbRhTgKBAr1bdCRsT1ZwBvIwtZZrm5Fhkom49lYTMUQ?e=kfU4b4).
+A write-up that contains the benchmark results and interpretation can be found [here](https://talenticaall-my.sharepoint.com/:w:/g/personal/nikhil_desai_talentica_com/ESEnZ3pFvdhHi4_8VLlQLWYBKEhAuUz5_ee5gSPnKYMSkw?e=zZmrMS).
