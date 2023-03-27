@@ -280,6 +280,35 @@ Note: encode() is a function that comes from the SCALE codec library and has enc
 Note:
 A [`sample Ink! smartcontract`](./test/) and the required trait implementation to make it work with the frame-benchmarking-cli are included for your reference.
 
+### Solidity WASM smartcontract benchmarking
+
+As Solidity WASM smartcontracts are executed by the same `pallet-contracts` pallet, we can use the same tool and approach as above, frame-benchmarking-cli to benchmark the Solidity contracts' public functions. This can be done by following the steps below:
+
+- Develop a [Solidity](https://soliditylang.org/) smartcontract and compile it to WASM using [Solang](https://solang.readthedocs.io/en/latest/).
+
+- You need two pieces of data at the very least, the address of the smartcontract and the byte vector that encodes both, the public function you wish to call and the arguments you wish to pass to it.
+
+- Start this node and deploy your contract. For more info on how to deploy your contract, please refer to [deploy Ink! smartcontracts](https://use.ink/getting-started/deploy-your-contract). Though the tutorial talks about Ink! smartcontracts in particular, the process also works for Solang-compiled Solidity smartcontracts.
+
+- Optionally, you can test it using the same UI mentioned in the link above by following the link [interact with Ink! smartcontracts](https://use.ink/getting-started/calling-your-contract).
+
+- Once you've created an instance of your smartcontract, you can see it's address in the [contracts-UI](https://contracts-ui.substrate.io/). Copy that into the file [`contract_address.txt`](./contract_address.txt).
+
+- An extrinsic that calls a public function of a smartcontract is actually represented by a `pallet-contracts::Call` extrinsic with the `dest` argument being your smartcontract address and the `data` argument being a byte vector that's encoded just like in [Remix Web IDE](https://remix.ethereum.org/). Simulate the call in `Remix` and expand the transaction, copy the value of the input key and that's your input/call-data.
+
+- frame-benchmarking-cli expects us to implement the `frame_benchmarking_cli::ExtrinsicBuilder` trait for each extrinsic that we want to benchmark. Let's extend the frame-benchmarking-cli to support your smartcontracts' public function by following the steps below:
+
+  - Within [`benchmarking.rs`](./node/src/benchmarking.rs), create a struct whose fields are a client, address of the smartcontract instance. The input is a `byte-string without the hex prefix` and can be obtained from the input key within the transaction object after simulating a call to the same function with same args in `Remix Web IDE`. The function `hex_string_to_bytes` takes this hex encoded string and returns a byte vector representation, which can be passed in for data argument. Implement the `frame_benchmarking_cli::ExtrinsicBuilder` trait on this struct.
+
+  - Remember to implement rest of the functions that comprise the aforementioned trait.
+
+  - Within [`command.rs`](./node/src/command.rs), inside the `BenchmarkCmd::Extrinsic(cmd)` code block and within the `ext_factory` vec, construct a new box with an instance of the above defined struct.
+
+- benchmark your smartcontracts' function using the following command, `./target/release/node-template benchmark extrinsic --pallet <pallet-name> --extrinsic <extrinsic-name>`. This command outputs the block execution time(in nanoseconds) stats and also the number of extrinsic instances included in a block. Dividing the average block execution time by number of extrinsics per block gives you the average time taken(in nanoseconds) to execute an extrinisic.
+
+Note:
+A [`sample solidity WASM smartcontract`](./solidity-sample-contract/) and the required trait implementation to make it work with the frame-benchmarking-cli are included for your reference.
+
 ### Run in Docker
 
 First, install [Docker](https://docs.docker.com/get-docker/) and
