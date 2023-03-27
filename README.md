@@ -11,6 +11,7 @@ Follow the steps below to get started with the Node Template
 ### Rust Setup
 
 First, complete the [basic Rust setup instructions](./docs/rust-setup.md).
+Note: Rust nightly 1.68 is required to build the template. Some of the dependencies report issues when you attempt to compile them using Rust nightly 1.70. Other users have also experienced the same [issue](https://substrate.stackexchange.com/questions/7714/cannot-run-substrate-on-a-fresh-macbook-m2).
 
 ### Run
 
