@@ -116,6 +116,8 @@ If the affected crate does not yet have `-dev` suffix:
 If your pull request introduces a new crate, please set its version to
 `1.0.0-dev`.
 
+Note: Rust nightly 1.68 is required to build the template. Some of the dependencies report issues when you attempt to compile them using Rust nightly 1.70. Other users have also experienced the same [issue](https://substrate.stackexchange.com/questions/7714/cannot-run-substrate-on-a-fresh-macbook-m2)
+
 ### Native Solidity smartcontracts benchmarking
 
 This node supports native solidity smartcontracts benchmarking by leveraging [frame-benchmarking-cli](https://github.com/paritytech/substrate/tree/master/utils/frame/benchmarking-cli).
