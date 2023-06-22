@@ -1,0 +1,1 @@
+/Users/nikhild/Documents/substrate-node-template/test/target/ink/release/metadata-gen: /Users/nikhild/Documents/substrate-node-template/test/lib.rs /private/var/folders/ll/gd__jdzs5kdcwk8lv__m7p7rfdxn9_/T/cargo-contract_sg1wvt/.ink/metadata_gen/main.rs

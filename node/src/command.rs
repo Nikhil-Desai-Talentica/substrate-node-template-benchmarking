@@ -1,5 +1,5 @@
 use crate::{
-	benchmarking::{inherent_benchmark_data, RemarkBuilder, TransferKeepAliveBuilder, SetNameBuilder, UpdateSomeNumBuilder, GetSomeNumBuilder, UpdateSomeStrBuilder, GetSomeStrBuilder, InkUpdateNumBuilder, InkGetNumBuilder,InkUpdateSBuilder, InkGetSBuilder, SoliditySetSomeNumBuilder, SolidityGetSomeNumBuilder, SoliditySetSomeStrBuilder, SolidityGetSomeStrBuilder},
+	benchmarking::{inherent_benchmark_data, RemarkBuilder, TransferKeepAliveBuilder, SetNameBuilder, UpdateSomeNumBuilder, GetSomeNumBuilder, UpdateSomeStrBuilder, GetSomeStrBuilder, FibonacciBuilder, OddProductBuilder, TriangleNumBuilder, SampleEventEmitBuilder, CrossPalletCallBuilder, InkUpdateNumBuilder, InkGetNumBuilder,InkUpdateSBuilder, InkGetSBuilder, InkFibonacciBuilder, InkOddProductBuilder, InkTriangleNumberBuilder, InkSampleEmitBuilder,SoliditySetSomeNumBuilder, SolidityGetSomeNumBuilder, SoliditySetSomeStrBuilder, SolidityGetSomeStrBuilder, SolidityFibonacciBuilder, SolidityOddProductBuilder, SolidityTriangleNumBuilder, SoliditySampleEventBuilder},
 	chain_spec,
 	cli::{Cli, Subcommand},
 	service,
@@ -201,6 +201,24 @@ pub fn run() -> sc_cli::Result<()> {
 							Box::new(GetSomeStrBuilder::new(
 								client.clone(),
 							)),
+							Box::new(FibonacciBuilder::new(
+								client.clone(),
+								10u32,
+							)),
+							Box::new(OddProductBuilder::new(
+								client.clone(),
+								10u32,
+							)),
+							Box::new(TriangleNumBuilder::new(
+								client.clone(),
+								10u32,
+							)),
+							Box::new(SampleEventEmitBuilder::new(
+								client.clone(),
+							)),
+							Box::new(CrossPalletCallBuilder::new(
+								client.clone(),
+							)),
 							Box::new(InkUpdateNumBuilder::new(
 								client.clone(),
 								read_contract_address(),
@@ -214,6 +232,22 @@ pub fn run() -> sc_cli::Result<()> {
 								read_contract_address(),
 							)),
 							Box::new(InkGetSBuilder::new(
+								client.clone(),
+								read_contract_address(),
+							)),
+							Box::new(InkFibonacciBuilder::new(
+								client.clone(),
+								read_contract_address(),
+							)),
+							Box::new(InkOddProductBuilder::new(
+								client.clone(),
+								read_contract_address(),
+							)),
+							Box::new(InkTriangleNumberBuilder::new(
+								client.clone(),
+								read_contract_address(),
+							)),
+							Box::new(InkSampleEmitBuilder::new(
 								client.clone(),
 								read_contract_address(),
 							)),
@@ -233,8 +267,23 @@ pub fn run() -> sc_cli::Result<()> {
 								client.clone(),
 								read_contract_address(),
 							)),
+							Box::new(SolidityFibonacciBuilder::new(
+								client.clone(),
+								read_contract_address(),
+							)),
+							Box::new(SolidityOddProductBuilder::new(
+								client.clone(),
+								read_contract_address(),
+							)),
+							Box::new(SolidityTriangleNumBuilder::new(
+								client.clone(),
+								read_contract_address(),
+							)),
+							Box::new(SoliditySampleEventBuilder::new(
+								client.clone(),
+								read_contract_address(),
+							)),
 						]);
-
 						cmd.run(client, inherent_benchmark_data()?, Vec::new(), &ext_factory)
 					},
 					BenchmarkCmd::Machine(cmd) =>

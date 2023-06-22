@@ -18,7 +18,7 @@ pub mod pallet {
 
 	/// Configure the pallet by specifying the parameters and types on which it depends.
 	#[pallet::config]
-	pub trait Config: frame_system::Config {
+	pub trait Config: frame_system::Config + pallet_callee::Config {
 		type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
 
 		// #[pallet::constant]
@@ -46,7 +46,26 @@ pub mod pallet {
 		NumChanged {old: i64, new: i64},
 		// Event emitted when the value of `SomeStr` is changed
 		StrChanged,
+		// Sample event emitted to benchmark event emission
+		SampleEmit,
 	}
+
+	fn fib(n: u32) -> u128 {
+		if n < 2 {
+			n.into()
+		} else {
+			fib(n-1).wrapping_add(fib(n-2))
+		}
+	}
+
+	fn odd_prod(n: u32) -> u128 {
+		(1..=n as u128).fold(1, |prod, x| prod.wrapping_mul(2 * x - 1))
+	}
+
+	fn triangle_num(n: u32) -> u128 {
+		(1..=n as u128).fold(0, |sum, x| sum.wrapping_add(x))
+	}
+
 
 	// #[pallet::error]
 	// pub enum Error<T> {
@@ -121,6 +140,53 @@ pub mod pallet {
 
 			let _old_str = maybe_some_str.unwrap_or_default();
 
+			Ok(())
+		}
+
+		#[pallet::call_index(4)]
+		#[pallet::weight(10_000)]
+		pub fn fibonacci(origin: OriginFor<T>, n: u32) -> DispatchResult {
+			let _sender = ensure_signed(origin)?;
+
+			let fib_n = fib(n);
+
+			Ok(())
+		}
+
+		#[pallet::call_index(5)]
+		#[pallet::weight(10_000)]
+		pub fn odd_product(origin: OriginFor<T>, n: u32) -> DispatchResult {
+			let _sender = ensure_signed(origin)?;
+
+			let odd_product_n = odd_prod(n);
+
+			Ok(())
+		}
+
+		#[pallet::call_index(6)]
+		#[pallet::weight(10_000)]
+		pub fn triangle_number(origin: OriginFor<T>, n: u32) -> DispatchResult {
+			let _sender = ensure_signed(origin)?;
+
+			let triangle_number_n = triangle_num(n);
+
+			Ok(())
+		}
+
+		#[pallet::call_index(7)]
+		#[pallet::weight(10_000)]
+		pub fn emit_sample_event(origin: OriginFor<T>) -> DispatchResult {
+			let _sender = ensure_signed(origin)?;
+
+			Self::deposit_event(Event::SampleEmit);
+
+			Ok(())
+		}
+
+		#[pallet::call_index(8)]
+		#[pallet::weight(10_000)]
+		pub fn store_num_in_callee(origin: OriginFor<T>, value: i64) -> DispatchResult {
+			pallet_callee::Pallet::<T>::store_num(origin, value);
 			Ok(())
 		}
 	}

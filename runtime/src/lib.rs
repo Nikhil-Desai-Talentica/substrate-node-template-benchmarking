@@ -55,6 +55,7 @@ pub use sp_runtime::BuildStorage;
 pub use sp_runtime::{Perbill, Permill};
 
 /// Import the template pallet.
+pub use pallet_callee;
 pub use pallet_template;
 pub use pallet_template::Call as TemplateCall;
 /// An index to a block.
@@ -472,6 +473,10 @@ impl pallet_contracts::Config for Runtime {
 	type UnsafeUnstableInterface = ConstBool<true>;
 }
 
+impl pallet_callee::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+}
+
 /// Configure the pallet-template in pallets/template.
 impl pallet_template::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
@@ -500,6 +505,7 @@ construct_runtime!(
 		Contracts: pallet_contracts,
 		Assets: pallet_assets,
 		// Include the custom logic from the pallet-template in the runtime.
+		Callee: pallet_callee,
 		TemplateModule: pallet_template,
 	}
 );

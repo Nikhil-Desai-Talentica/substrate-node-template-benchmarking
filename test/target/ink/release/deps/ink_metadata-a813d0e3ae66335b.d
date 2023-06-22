@@ -1,0 +1,11 @@
+/Users/nikhild/Documents/substrate-node-template/test/target/ink/release/deps/ink_metadata-a813d0e3ae66335b.rmeta: /Users/nikhild/.cargo/registry/src/github.com-1ecc6299db9ec823/ink_metadata-4.0.0/src/lib.rs /Users/nikhild/.cargo/registry/src/github.com-1ecc6299db9ec823/ink_metadata-4.0.0/src/layout/mod.rs /Users/nikhild/.cargo/registry/src/github.com-1ecc6299db9ec823/ink_metadata-4.0.0/src/layout/validate.rs /Users/nikhild/.cargo/registry/src/github.com-1ecc6299db9ec823/ink_metadata-4.0.0/src/specs.rs /Users/nikhild/.cargo/registry/src/github.com-1ecc6299db9ec823/ink_metadata-4.0.0/src/utils.rs
+
+/Users/nikhild/Documents/substrate-node-template/test/target/ink/release/deps/libink_metadata-a813d0e3ae66335b.rlib: /Users/nikhild/.cargo/registry/src/github.com-1ecc6299db9ec823/ink_metadata-4.0.0/src/lib.rs /Users/nikhild/.cargo/registry/src/github.com-1ecc6299db9ec823/ink_metadata-4.0.0/src/layout/mod.rs /Users/nikhild/.cargo/registry/src/github.com-1ecc6299db9ec823/ink_metadata-4.0.0/src/layout/validate.rs /Users/nikhild/.cargo/registry/src/github.com-1ecc6299db9ec823/ink_metadata-4.0.0/src/specs.rs /Users/nikhild/.cargo/registry/src/github.com-1ecc6299db9ec823/ink_metadata-4.0.0/src/utils.rs
+
+/Users/nikhild/Documents/substrate-node-template/test/target/ink/release/deps/ink_metadata-a813d0e3ae66335b.d: /Users/nikhild/.cargo/registry/src/github.com-1ecc6299db9ec823/ink_metadata-4.0.0/src/lib.rs /Users/nikhild/.cargo/registry/src/github.com-1ecc6299db9ec823/ink_metadata-4.0.0/src/layout/mod.rs /Users/nikhild/.cargo/registry/src/github.com-1ecc6299db9ec823/ink_metadata-4.0.0/src/layout/validate.rs /Users/nikhild/.cargo/registry/src/github.com-1ecc6299db9ec823/ink_metadata-4.0.0/src/specs.rs /Users/nikhild/.cargo/registry/src/github.com-1ecc6299db9ec823/ink_metadata-4.0.0/src/utils.rs
+
+/Users/nikhild/.cargo/registry/src/github.com-1ecc6299db9ec823/ink_metadata-4.0.0/src/lib.rs:
+/Users/nikhild/.cargo/registry/src/github.com-1ecc6299db9ec823/ink_metadata-4.0.0/src/layout/mod.rs:
+/Users/nikhild/.cargo/registry/src/github.com-1ecc6299db9ec823/ink_metadata-4.0.0/src/layout/validate.rs:
+/Users/nikhild/.cargo/registry/src/github.com-1ecc6299db9ec823/ink_metadata-4.0.0/src/specs.rs:
+/Users/nikhild/.cargo/registry/src/github.com-1ecc6299db9ec823/ink_metadata-4.0.0/src/utils.rs:

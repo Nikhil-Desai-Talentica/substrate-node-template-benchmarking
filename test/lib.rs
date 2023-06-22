@@ -4,6 +4,9 @@
 mod test {
 
 	use ink_prelude::string::String;
+
+	#[ink(event)]
+	pub struct SampleEvent;
     /// Defines the storage of your contract.
     /// Add new fields to the below struct in order
     /// to add new static storage fields to your contract.
@@ -54,6 +57,30 @@ mod test {
 		#[ink(message)]
 		pub fn get_s(&self) -> String {
 			self.s.clone()
+		}
+
+		#[ink(message)]
+		pub fn fibonacci(&self, n: u32) -> u128 {
+			if n < 2 {
+				n.into()
+			} else {
+				self.fibonacci(n-1) + self.fibonacci(n-2)
+			}
+		}
+
+		#[ink(message)]
+		pub fn odd_product(&self, n: u32) -> u128 {
+			(1..=n as u128).fold(1, |prod, x| prod * (2 * x - 1))
+		}
+
+		#[ink(message)]
+		pub fn triangle_number(&self, n: u32) -> u128 {
+			(1..=n as u128).fold(0, |sum, x| sum + x)
+		}
+
+		#[ink(message)]
+		pub fn emit_sample_event(&self) {
+			self.env().emit_event(SampleEvent{});
 		}
     }
 
