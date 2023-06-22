@@ -11,6 +11,7 @@ Follow the steps below to get started with the Node Template
 ### Rust Setup
 
 First, complete the [basic Rust setup instructions](./docs/rust-setup.md).
+Note: Rust nightly 1.68 is required to build the template. Some of the dependencies report issues when you attempt to compile them using Rust nightly 1.70. Other users have also experienced the same [issue](https://substrate.stackexchange.com/questions/7714/cannot-run-substrate-on-a-fresh-macbook-m2).
 
 ### Run
 
@@ -308,6 +309,10 @@ As Solidity WASM smartcontracts are executed by the same `pallet-contracts` pall
 
 Note:
 A [`sample solidity WASM smartcontract`](./solidity-sample-contract/) and the required trait implementation to make it work with the frame-benchmarking-cli are included for your reference.
+
+### Benchmark results and demo
+A walkthrough of the above process is recorded and is available [here](https://talenticaall-my.sharepoint.com/:v:/g/personal/nikhil_desai_talentica_com/Ea_GbRhTgKBAr1bdCRsT1ZwBvIwtZZrm5Fhkom49lYTMUQ?e=kfU4b4).
+A write-up that contains the benchmark results and interpretation can be found [here](https://talenticaall-my.sharepoint.com/:w:/g/personal/nikhil_desai_talentica_com/ESEnZ3pFvdhHi4_8VLlQLWYBKEhAuUz5_ee5gSPnKYMSkw?e=zZmrMS).
 
 ### Run in Docker
 
