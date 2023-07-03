@@ -1,6 +1,6 @@
 {
   "source": {
-    "hash": "0xb95301a2037298637b5aa77dd911594bb6c25c5f5f84f68a433e949dedf17edd",
+    "hash": "0x408cd72ebb6be820724d44e2d55d80f76096eaf127e15bd68dcced81cd8b42ee",
     "language": "ink! 4.0.0",
     "compiler": "rustc 1.68.0-nightly",
     "build_info": {
@@ -270,6 +270,38 @@
           "type": 2
         },
         "selector": "0x435a644f"
+      },
+      {
+        "args": [
+          {
+            "label": "contract_addr",
+            "type": {
+              "displayName": [],
+              "type": 10
+            }
+          },
+          {
+            "label": "new_value",
+            "type": {
+              "displayName": [
+                "i64"
+              ],
+              "type": 0
+            }
+          }
+        ],
+        "docs": [],
+        "label": "call_another_contract",
+        "mutates": false,
+        "payable": false,
+        "returnType": {
+          "displayName": [
+            "ink",
+            "MessageResult"
+          ],
+          "type": 12
+        },
+        "selector": "0x5accc895"
       }
     ]
   },
@@ -528,6 +560,75 @@
       "type": {
         "def": {
           "primitive": "u128"
+        }
+      }
+    },
+    {
+      "id": 10,
+      "type": {
+        "def": {
+          "array": {
+            "len": 32,
+            "type": 11
+          }
+        }
+      }
+    },
+    {
+      "id": 11,
+      "type": {
+        "def": {
+          "primitive": "u8"
+        }
+      }
+    },
+    {
+      "id": 12,
+      "type": {
+        "def": {
+          "variant": {
+            "variants": [
+              {
+                "fields": [
+                  {
+                    "type": 13
+                  }
+                ],
+                "index": 0,
+                "name": "Ok"
+              },
+              {
+                "fields": [
+                  {
+                    "type": 4
+                  }
+                ],
+                "index": 1,
+                "name": "Err"
+              }
+            ]
+          }
+        },
+        "params": [
+          {
+            "name": "T",
+            "type": 13
+          },
+          {
+            "name": "E",
+            "type": 4
+          }
+        ],
+        "path": [
+          "Result"
+        ]
+      }
+    },
+    {
+      "id": 13,
+      "type": {
+        "def": {
+          "primitive": "bool"
         }
       }
     }

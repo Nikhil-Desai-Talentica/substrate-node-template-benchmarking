@@ -1,22 +1,18 @@
 [workspace]
 [package]
-name = "test"
+name = "inner"
 version = "0.1.0"
 authors = ["[your_name] <[your_email]>"]
 edition = "2021"
 
 [dependencies]
 ink = { version = "4.0.0-rc", default-features = false }
-ink_prelude = { version = "4.0.0", default-features = false }
-ink_env = { version = "4.0.0", default-features = false }
+
 scale = { package = "parity-scale-codec", version = "3", default-features = false, features = ["derive"] }
 scale-info = { version = "2.3", default-features = false, features = ["derive"], optional = true }
 
 [lib]
 path = "lib.rs"
-
-[profile.release]
-overflow-checks = false
 
 [features]
 default = ["std"]

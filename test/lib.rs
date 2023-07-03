@@ -4,6 +4,8 @@
 mod test {
 
 	use ink_prelude::string::String;
+	use ink_env::DefaultEnvironment;
+	use ink_env::call::{build_call, ExecutionInput, Selector};
 
 	#[ink(event)]
 	pub struct SampleEvent;
@@ -82,6 +84,22 @@ mod test {
 		pub fn emit_sample_event(&self) {
 			self.env().emit_event(SampleEvent{});
 		}
+
+		#[ink(message)]
+		pub fn call_another_contract(&self, contract_addr: [u8; 32], new_value: i64) -> bool {
+			let my_return_value = build_call::<DefaultEnvironment>()
+				.call(AccountId::from(contract_addr))
+				.gas_limit(0)
+				.transferred_value(Default::default())
+				.exec_input(
+					ExecutionInput::new(Selector::new(ink::selector_bytes!("update")))
+						.push_arg(new_value)
+				)
+				.returns::<bool>()
+				.invoke();
+			my_return_value
+		}
+
     }
 
     /// Unit tests in Rust are normally defined within such a `#[cfg(test)]`

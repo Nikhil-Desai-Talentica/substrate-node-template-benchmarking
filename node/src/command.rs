@@ -1,5 +1,5 @@
 use crate::{
-	benchmarking::{inherent_benchmark_data, RemarkBuilder, TransferKeepAliveBuilder, SetNameBuilder, UpdateSomeNumBuilder, GetSomeNumBuilder, UpdateSomeStrBuilder, GetSomeStrBuilder, FibonacciBuilder, OddProductBuilder, TriangleNumBuilder, SampleEventEmitBuilder, CrossPalletCallBuilder, InkUpdateNumBuilder, InkGetNumBuilder,InkUpdateSBuilder, InkGetSBuilder, InkFibonacciBuilder, InkOddProductBuilder, InkTriangleNumberBuilder, InkSampleEmitBuilder,SoliditySetSomeNumBuilder, SolidityGetSomeNumBuilder, SoliditySetSomeStrBuilder, SolidityGetSomeStrBuilder, SolidityFibonacciBuilder, SolidityOddProductBuilder, SolidityTriangleNumBuilder, SoliditySampleEventBuilder},
+	benchmarking::{inherent_benchmark_data, RemarkBuilder, TransferKeepAliveBuilder, SetNameBuilder, UpdateSomeNumBuilder, GetSomeNumBuilder, UpdateSomeStrBuilder, GetSomeStrBuilder, FibonacciBuilder, OddProductBuilder, TriangleNumBuilder, SampleEventEmitBuilder, CrossPalletCallBuilder, InkUpdateNumBuilder, InkGetNumBuilder,InkUpdateSBuilder, InkGetSBuilder, InkFibonacciBuilder, InkOddProductBuilder, InkTriangleNumberBuilder, InkSampleEmitBuilder, InkCrossContractCallBuilder, SoliditySetSomeNumBuilder, SolidityGetSomeNumBuilder, SoliditySetSomeStrBuilder, SolidityGetSomeStrBuilder, SolidityFibonacciBuilder, SolidityOddProductBuilder, SolidityTriangleNumBuilder, SoliditySampleEventBuilder},
 	chain_spec,
 	cli::{Cli, Subcommand},
 	service,
@@ -13,7 +13,13 @@ use std::fs;
 
 fn read_contract_address() -> String {
 	let contents = fs::read_to_string("./contract_address.txt").expect("failed to read 'contract_address.txt'");
-	println!("{}", contents);
+	// println!("{}", contents);
+	contents.trim().into()
+}
+
+fn read_callee_contract_address() -> String {
+	let contents = fs::read_to_string("./callee_contract_address.txt").expect("failed to read 'callee_contract_address.txt'");
+	// println!("{}", contents);
 	contents.trim().into()
 }
 
@@ -250,6 +256,11 @@ pub fn run() -> sc_cli::Result<()> {
 							Box::new(InkSampleEmitBuilder::new(
 								client.clone(),
 								read_contract_address(),
+							)),
+							Box::new(InkCrossContractCallBuilder::new(
+								client.clone(),
+								read_contract_address(),
+								read_callee_contract_address(),
 							)),
 							Box::new(SoliditySetSomeNumBuilder::new(
 								client.clone(),

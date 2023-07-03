@@ -896,6 +896,58 @@ impl frame_benchmarking_cli::ExtrinsicBuilder for InkSampleEmitBuilder {
 	}
 }
 
+pub struct InkCrossContractCallBuilder {
+	client: Arc<FullClient>,
+	contract_addr: String,
+	callee_contract_addr: String,
+}
+
+impl InkCrossContractCallBuilder {
+	pub fn new(client: Arc<FullClient>, contract_addr: String, callee_contract_addr: String) -> Self {
+		Self { client, contract_addr, callee_contract_addr }
+	}
+}
+
+impl frame_benchmarking_cli::ExtrinsicBuilder for InkCrossContractCallBuilder {
+	fn pallet(&self) -> &str {
+		"contract-test"
+	}
+
+	fn extrinsic(&self) -> &str {
+		"cross_contract_call"
+	}
+
+	fn build(&self, nonce: u32) -> std::result::Result<OpaqueExtrinsic, &'static str> {
+		let mut call_data: Vec<u8> = Vec::new();
+		// `msg_selector` identifies the message to be invoked
+		let mut msg_selector: Vec<u8> = [0x5A, 0xCC, 0xC8, 0x95].into();
+		// `msg_args` are the SCALE-encoded args to be passed to the above message
+		let cntrct_addr: [u8; 32] = (AccountId32::from_str(&*self.callee_contract_addr).unwrap()).into();
+		let mut cntrct_addr_encoded = cntrct_addr.encode();
+		let mut new_value_encoded = 100i64.encode();
+		// construct a call to a specific message with the arguments
+		call_data.append(&mut msg_selector);
+		call_data.append(&mut cntrct_addr_encoded);
+		call_data.append(&mut new_value_encoded);
+		let acc = Sr25519Keyring::Bob.pair();
+		let extrinsic: OpaqueExtrinsic = create_benchmark_extrinsic(
+			self.client.as_ref(),
+			acc,
+			ContractsCall::call {
+				 dest: Address::Address32(*AccountId32::from_str(&*self.contract_addr).unwrap().as_ref()).into(),
+				 value: Default::default(),
+				 gas_limit: Default::default(),
+				 storage_deposit_limit: Default::default(),
+				 data: call_data.clone()
+			}.into(),
+			nonce,
+		)
+		.into();
+
+		Ok(extrinsic)
+	}
+}
+
 pub struct SoliditySetSomeNumBuilder {
 	client: Arc<FullClient>,
 	contract_addr: String,
