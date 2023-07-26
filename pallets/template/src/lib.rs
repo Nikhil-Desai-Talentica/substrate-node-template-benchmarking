@@ -148,7 +148,7 @@ pub mod pallet {
 		pub fn fibonacci(origin: OriginFor<T>, n: u32) -> DispatchResult {
 			let _sender = ensure_signed(origin)?;
 
-			let fib_n = fib(n);
+			let _fib_n = fib(n);
 
 			Ok(())
 		}
@@ -158,7 +158,7 @@ pub mod pallet {
 		pub fn odd_product(origin: OriginFor<T>, n: u32) -> DispatchResult {
 			let _sender = ensure_signed(origin)?;
 
-			let odd_product_n = odd_prod(n);
+			let _odd_product_n = odd_prod(n);
 
 			Ok(())
 		}
@@ -168,7 +168,7 @@ pub mod pallet {
 		pub fn triangle_number(origin: OriginFor<T>, n: u32) -> DispatchResult {
 			let _sender = ensure_signed(origin)?;
 
-			let triangle_number_n = triangle_num(n);
+			let _triangle_number_n = triangle_num(n);
 
 			Ok(())
 		}
@@ -186,8 +186,11 @@ pub mod pallet {
 		#[pallet::call_index(8)]
 		#[pallet::weight(10_000)]
 		pub fn store_num_in_callee(origin: OriginFor<T>, value: i64) -> DispatchResult {
-			pallet_callee::Pallet::<T>::store_num(origin, value);
-			Ok(())
+			let cross_pallet_call_result = pallet_callee::Pallet::<T>::store_num(origin, value);
+			match cross_pallet_call_result {
+				Ok(_success) => Ok(()),
+				Err(_failure) => Ok(())
+			}
 		}
 	}
 }
