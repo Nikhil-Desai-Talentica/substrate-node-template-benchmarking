@@ -95,7 +95,7 @@ pub mod pallet {
 			let old: i64 = maybe_old_num.unwrap_or_default();
 			<SomeNum<T>>::put(value);
 
-			Self::deposit_event(Event::NumChanged { old: old, new: value });
+			Self::deposit_event(Event::NumChanged { old, new: value });
 
 			Ok(())
 		}
